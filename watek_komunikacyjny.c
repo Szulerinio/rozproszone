@@ -18,6 +18,7 @@ void *startKomWatek(void *ptr) {
     pthread_mutex_lock(&mutex);
     timestamp =
         recivedTimestamp > timestamp ? recivedTimestamp + 1 : timestamp + 1;
+    addToLamportTable(pakiet.src, pakiet.ts);
     pthread_mutex_unlock(&mutex);
 
     switch (status.MPI_TAG) {
@@ -28,10 +29,13 @@ void *startKomWatek(void *ptr) {
 
       addToQueue(pakiet.src, pakiet.ts, pakiet.data);
       printQueue();
+      // if (lamportTable.size == queue.capacity - 1) {
       if (queue.size == queue.capacity - 1) {
         // simple example - weight 1. Later should sum up all weight
         int ourPosition = getPosition(rank);
         if (ourPosition == liftCapacity) {
+          //  I am the manager of the lift
+          stan = Manager;
           for (int sendingIndex = 0; sendingIndex < ourPosition;
                sendingIndex++) {
             for (int i = 0; i < size; i++) {
@@ -50,8 +54,7 @@ void *startKomWatek(void *ptr) {
       pthread_mutex_lock(&mutex);
       if (pakiet.data == rank) {
         // we are in the lift
-        stan = InLift;
-      } else {
+        stan = InLiftUp;
       }
       removeFromQueue(pakiet.data);
       pthread_mutex_unlock(&mutex);
@@ -69,7 +72,10 @@ void *startKomWatek(void *ptr) {
     case RELEASE:
 
       pthread_mutex_lock(&mutex);
-
+      if (stan == InLiftUp) {
+        stan = AtTopFloor;
+      } else {
+      }
       pthread_mutex_unlock(&mutex);
 
       break;

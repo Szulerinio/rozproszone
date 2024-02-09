@@ -10,9 +10,6 @@ void initPriorityQueue(int capacity) {
 }
 
 void addToQueue(int processId, int timestamp, int weight) {
-  int toAdd = TRUE;
-
-  // jeśli już takie id procesu istnieje to podmień ts
 
   if (queue.size < queue.capacity) {
     queue.elements[queue.size].processId = processId;

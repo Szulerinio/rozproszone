@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "lamportTable.h"
 #include "queue.h"
 #include "util.h"
 /* boolean */
@@ -22,12 +23,14 @@ extern int rank;
 extern int size;
 extern int timestamp;
 extern PriorityQueue queue;
+extern LamportTable lamportTable;
 extern int ackCount;
 typedef enum {
   InRun,
   WantToQueue,
   Waiting,
-  InLift,
+  Manager,
+  InLiftUp,
   AtTopFloor,
   InFinish
 } state_t;

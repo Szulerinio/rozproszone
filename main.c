@@ -1,4 +1,5 @@
 #include "main.h"
+#include "lamportTable.h"
 #include "queue.h"
 #include "watek_glowny.h"
 #include "watek_komunikacyjny.h"
@@ -10,6 +11,7 @@ int currentPackageWeight = 1;
 int liftCapacity = 3;
 state_t stan = InRun;
 PriorityQueue queue;
+LamportTable lamportTable;
 
 pthread_t threadKom, threadMon;
 pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
@@ -62,6 +64,7 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   initPriorityQueue(size);
+  initLamportTable(size);
 
   pthread_create(&threadKom, NULL, startKomWatek, 0);
   mainLoop();
