@@ -13,6 +13,7 @@ state_t stan = InRun;
 PriorityQueue queue;
 LamportTable lamportTable;
 int isCriticalOccupied = 0;
+int iAmAtBottomFloor = 1;
 
 pthread_t threadKom, threadMon;
 pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;
@@ -58,7 +59,8 @@ int main(int argc, char **argv) {
   int provided;
   MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
   check_thread_support(provided);
-  // srand(rank);
+  srand(rank);
+
   inicjuj_typ_pakietu(); // tworzy typ pakietu
   packet_t pkt;
   MPI_Comm_size(MPI_COMM_WORLD, &size);

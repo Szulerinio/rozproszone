@@ -1,4 +1,5 @@
 #include "watek_komunikacyjny.h"
+#include "lamportTable.h"
 #include "main.h"
 #include "queue.h"
 #include "util.h"
@@ -23,28 +24,34 @@ void *startKomWatek(void *ptr) {
 
     switch (status.MPI_TAG) {
     case REQUEST:
-      // debug("Dostałem request od %d z ts=%d", pakiet.src, pakiet.ts);
+      debug("Dostałem request od %d z ts=%d", pakiet.src, pakiet.ts);
       pthread_mutex_lock(&mutex);
       sendPacket(pakiet.src, ACK, 0, 0);
 
       addToQueue(pakiet.src, pakiet.ts, pakiet.data, pakiet.isGoingUp);
-      printQueue();
 
       pthread_mutex_unlock(&mutex);
 
       break;
 
     case TAKEN:
-      // debug("Dostałem TAKEN od %d z ts=%d", pakiet.src, pakiet.ts);
+      debug("Dostałem TAKEN od %d z ts=%d i data=%d", pakiet.src, pakiet.ts,
+            pakiet.data);
+
+      // dodaję do listy lamporta proces który wszedł do windy z timestampem od
+      // menagera
+      addToLamportTable(pakiet.data, pakiet.ts);
+      if (isCriticalOccupied == 0) {
+        printQueue();
+      }
+
       pthread_mutex_lock(&mutex);
+      isCriticalOccupied = 1;
       if (pakiet.data == rank) {
         // we are in the lift
-        stan = InLiftUp;
-      } else {
-        if (stan != InLiftUp) {
-          isCriticalOccupied = 1;
-        }
+        stan = InLift;
       }
+
       removeFromQueue(pakiet.data);
       pthread_mutex_unlock(&mutex);
 
@@ -63,9 +70,15 @@ void *startKomWatek(void *ptr) {
       pthread_mutex_lock(&mutex);
 
       isCriticalOccupied = 0;
+      if (stan == InLift) {
+        if (iAmAtBottomFloor == 0) {
+          iAmAtBottomFloor = 1;
+          stan = InRun;
+        } else {
+          iAmAtBottomFloor = 0;
+          stan = AtTopFloor;
+        }
 
-      if (stan == InLiftUp) {
-        stan = AtTopFloor;
       } else {
       }
       pthread_mutex_unlock(&mutex);

@@ -13,7 +13,7 @@ typedef struct {
 } LamportTable;
 
 void initLamportTable(int capacity);
-void addToLamportTable(int processId, int timestamp);
+void addToLamportTable(int processId, int processTimestamp);
 int getLamportTablePosition(int processId);
 void printLamportTable();
 int getProcessTimestamp(int processId);

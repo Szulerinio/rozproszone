@@ -10,14 +10,14 @@ void initLamportTable(int capacity) {
   lamportTable.size = 0;
 }
 
-void addToLamportTable(int processId, int timestamp) {
+void addToLamportTable(int processId, int processTimestamp) {
 
   int index = getLamportTablePosition(processId);
   if (index == -1) {
     // not in table yet
     if (lamportTable.size < lamportTable.capacity) {
       lamportTable.elements[lamportTable.size].processId = processId;
-      lamportTable.elements[lamportTable.size].timestamp = timestamp;
+      lamportTable.elements[lamportTable.size].timestamp = processTimestamp;
 
       lamportTable.size++;
     } else {
@@ -25,7 +25,9 @@ void addToLamportTable(int processId, int timestamp) {
     }
   } else {
     // already in table
-    lamportTable.elements[index].timestamp = timestamp;
+    if (lamportTable.elements[index].timestamp < processTimestamp) {
+      lamportTable.elements[index].timestamp = processTimestamp;
+    }
   }
 }
 

@@ -4,7 +4,6 @@
 #include "util.h"
 #include <stdio.h>
 #include <unistd.h>
-
 void mainLoop() {
   // srandom(rank);
   int tag;
@@ -12,15 +11,19 @@ void mainLoop() {
   while (stan != InFinish) {
     switch (stan) {
     case InRun: {
+      debug("zaczynam czekać");
+      sleep(rand() % 10);
+      debug("kończę czekać");
       pthread_mutex_lock(&mutex);
-      stan = WantToQueueToTop;
+      stan = WantToQueue;
+
       pthread_mutex_unlock(&mutex);
       break;
     }
-    case WantToQueueToTop: {
+    case WantToQueue: {
       pthread_mutex_lock(&mutex);
       for (int i = 0; i < size; i++) {
-        sendPacket(i, REQUEST, currentPackageWeight, 1);
+        sendPacket(i, REQUEST, currentPackageWeight, iAmAtBottomFloor);
       }
       stan = Waiting;
       pthread_mutex_unlock(&mutex);
@@ -38,7 +41,7 @@ void mainLoop() {
             if (getPosition(i) == -1) {
               // check if we know that their timestamp is higher than our
               // request's - then they cant get in front of us
-              if (getReqTimestamp(rank) < getProcessTimestamp(i)) {
+              if (getReqTimestamp(rank) >= getProcessTimestamp(i)) {
                 ourReqHasLowerLamportThanCurrentLamportOfPeopleOutside = 0;
                 break;
               }
@@ -63,13 +66,22 @@ void mainLoop() {
 
               for (int sendingIndex = 0; sendingIndex < ourPosition;
                    sendingIndex++) {
+                debug("windą jedzie =%d",
+                      queue.elements[sendingIndex].processId);
                 for (int i = 0; i < size; i++) {
-                  // if (i != rank) {
-                  sendPacket(i, TAKEN, queue.elements[sendingIndex].processId,
-                             0);
-                  // removeFromQueue(sendingIndex);
-                  // }
+                  if (i != rank) {
+                    sendPacket(i, TAKEN, queue.elements[sendingIndex].processId,
+                               0);
+                  }
                 }
+              }
+
+              for (int sendingIndex = 0; sendingIndex < ourPosition;
+                   sendingIndex++) {
+                debug("Wysłałbym TAKEN do siebie  data=%d",
+                      queue.elements[0].processId);
+                removeFromQueue(queue.elements[0].processId);
+                isCriticalOccupied = 1;
               }
             }
           }
@@ -83,8 +95,8 @@ void mainLoop() {
     case Manager: {
 
       debug("Jestem manger");
+      usleep(2500000);
       pthread_mutex_lock(&mutex);
-      usleep(5000000);
 
       for (int i = 0; i < size; i++) {
         sendPacket(i, RELEASE, currentPackageWeight, 0);
@@ -96,20 +108,15 @@ void mainLoop() {
       break;
     }
     case AtTopFloor: {
-      pthread_mutex_lock(&mutex);
       // odkładam paczkę jakiś czas
-      usleep(500000);
-      stan = WantToQueueToBottom;
 
-      pthread_mutex_unlock(&mutex);
-      break;
-    }
-    case WantToQueueToBottom: {
+      debug("zaczynam czekać");
+      sleep(rand() % 10);
+      debug("kończę czekać");
+
       pthread_mutex_lock(&mutex);
-      for (int i = 0; i < size; i++) {
-        sendPacket(i, REQUEST, currentPackageWeight, 0);
-      }
-      stan = Waiting;
+      stan = WantToQueue;
+
       pthread_mutex_unlock(&mutex);
       break;
     }
