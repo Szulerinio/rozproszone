@@ -5,6 +5,7 @@ typedef struct {
   int processId;
   int timestamp;
   int weight;
+  int isGoingUp;
 } QueueElement;
 
 typedef struct {
@@ -14,11 +15,13 @@ typedef struct {
 } PriorityQueue;
 
 void initPriorityQueue(int capacity);
-void addToQueue(int processId, int timestamp, int weight);
+void addToQueue(int processId, int timestamp, int weight, int isGoingUp);
 void removeFromQueue(int processId);
 void clearPriorityQueue();
 void sortPriorityQueue();
 int getPosition(int processId);
 void printQueue();
+int getReqTimestamp(int processId);
+int getReqDirection(int processId);
 
 #endif // QUEUE_H

@@ -16,5 +16,6 @@ void initLamportTable(int capacity);
 void addToLamportTable(int processId, int timestamp);
 int getLamportTablePosition(int processId);
 void printLamportTable();
+int getProcessTimestamp(int processId);
 
 #endif // LAMPORT_TABLE_H

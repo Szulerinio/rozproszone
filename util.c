@@ -26,13 +26,14 @@ void inicjuj_typ_pakietu() {
      brzydzimy się czymś w rodzaju MPI_Send(&typ, sizeof(pakiet_t), MPI_BYTE....
   */
   /* sklejone z stackoverflow */
-  int blocklengths[NITEMS] = {1, 1, 1};
-  MPI_Datatype typy[NITEMS] = {MPI_INT, MPI_INT, MPI_INT};
+  int blocklengths[NITEMS] = {1, 1, 1, 1};
+  MPI_Datatype typy[NITEMS] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT};
 
   MPI_Aint offsets[NITEMS];
   offsets[0] = offsetof(packet_t, ts);
   offsets[1] = offsetof(packet_t, src);
   offsets[2] = offsetof(packet_t, data);
+  offsets[3] = offsetof(packet_t, isGoingUp);
 
   MPI_Type_create_struct(NITEMS, blocklengths, offsets, typy, &MPI_PAKIET_T);
 
@@ -40,12 +41,13 @@ void inicjuj_typ_pakietu() {
 }
 
 /* opis patrz util.h */
-void sendPacket(int destination, int tag, int data) {
+void sendPacket(int destination, int tag, int data, int isGoingUp) {
   packet_t *pkt = malloc(sizeof(packet_t));
 
   pkt->src = rank;
   pkt->ts = timestamp;
   pkt->data = data;
+  pkt->isGoingUp = isGoingUp;
 
   MPI_Send(pkt, 1, MPI_PAKIET_T, destination, tag, MPI_COMM_WORLD);
   debug("Wysyłam %s do %d z t=%d", tag2string(tag), destination, timestamp);

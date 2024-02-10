@@ -23,38 +23,27 @@ void *startKomWatek(void *ptr) {
 
     switch (status.MPI_TAG) {
     case REQUEST:
-      debug("Dostałem request od %d z ts=%d", pakiet.src, pakiet.ts);
+      // debug("Dostałem request od %d z ts=%d", pakiet.src, pakiet.ts);
       pthread_mutex_lock(&mutex);
-      sendPacket(pakiet.src, ACK, 0);
+      sendPacket(pakiet.src, ACK, 0, 0);
 
-      addToQueue(pakiet.src, pakiet.ts, pakiet.data);
+      addToQueue(pakiet.src, pakiet.ts, pakiet.data, pakiet.isGoingUp);
       printQueue();
-      // if (lamportTable.size == queue.capacity - 1) {
-      if (queue.size == queue.capacity - 1) {
-        // simple example - weight 1. Later should sum up all weight
-        int ourPosition = getPosition(rank);
-        if (ourPosition == liftCapacity) {
-          //  I am the manager of the lift
-          stan = Manager;
-          for (int sendingIndex = 0; sendingIndex < ourPosition;
-               sendingIndex++) {
-            for (int i = 0; i < size; i++) {
-              sendPacket(i, TAKEN, sendingIndex);
-            }
-          }
-        }
-      }
 
       pthread_mutex_unlock(&mutex);
 
       break;
 
     case TAKEN:
-      debug("Dostałem TAKEN od %d z ts=%d", pakiet.src, pakiet.ts);
+      // debug("Dostałem TAKEN od %d z ts=%d", pakiet.src, pakiet.ts);
       pthread_mutex_lock(&mutex);
       if (pakiet.data == rank) {
         // we are in the lift
         stan = InLiftUp;
+      } else {
+        if (stan != InLiftUp) {
+          isCriticalOccupied = 1;
+        }
       }
       removeFromQueue(pakiet.data);
       pthread_mutex_unlock(&mutex);
@@ -62,7 +51,7 @@ void *startKomWatek(void *ptr) {
       break;
 
     case ACK:
-      debug("Dostałem ACK od %d z ts=%d", pakiet.src, pakiet.ts);
+      // debug("Dostałem ACK od %d z ts=%d", pakiet.src, pakiet.ts);
 
       pthread_mutex_lock(&mutex);
 
@@ -72,6 +61,9 @@ void *startKomWatek(void *ptr) {
     case RELEASE:
 
       pthread_mutex_lock(&mutex);
+
+      isCriticalOccupied = 0;
+
       if (stan == InLiftUp) {
         stan = AtTopFloor;
       } else {

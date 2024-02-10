@@ -8,10 +8,11 @@ int rank, size;
 int timestamp = 0;
 int ackCount = 0;
 int currentPackageWeight = 1;
-int liftCapacity = 3;
+int liftCapacity = 2;
 state_t stan = InRun;
 PriorityQueue queue;
 LamportTable lamportTable;
+int isCriticalOccupied = 0;
 
 pthread_t threadKom, threadMon;
 pthread_mutex_t stateMut = PTHREAD_MUTEX_INITIALIZER;

@@ -27,17 +27,19 @@ extern LamportTable lamportTable;
 extern int ackCount;
 typedef enum {
   InRun,
-  WantToQueue,
+  WantToQueueToTop,
   Waiting,
   Manager,
   InLiftUp,
   AtTopFloor,
+  WantToQueueToBottom,
   InFinish
 } state_t;
 extern state_t stan;
 extern pthread_t threadKom, threadMon;
 extern int currentPackageWeight;
 extern int liftCapacity;
+extern int isCriticalOccupied;
 
 extern pthread_mutex_t stateMut;
 

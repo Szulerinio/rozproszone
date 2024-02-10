@@ -44,3 +44,10 @@ void printLamportTable() {
            lamportTable.elements[i].timestamp);
   printf("\n");
 }
+
+int getProcessTimestamp(int processId) {
+  for (int i = 0; i < lamportTable.size; i++)
+    if (lamportTable.elements[i].processId == processId)
+      return lamportTable.elements[i].timestamp;
+  return -1;
+}

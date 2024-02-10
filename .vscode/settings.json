@@ -1,5 +1,8 @@
 {
     "files.associations": {
         "watek_komunikacyjny.h": "c"
-    }
+    },
+    "cSpell.words": [
+        "Lamport"
+    ]
 }
